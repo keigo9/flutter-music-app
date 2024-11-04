@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:music_app/modules/songs/song.dart';
 
 late SpotifyClient spotify;
 
@@ -33,5 +34,25 @@ class SpotifyClient {
 
   void test() {
     print(token);
+  }
+
+  Future<List<Song>> getPopularSongs() async {
+    Response response = await dio.get(
+      "https://api.spotify.com/v1/playlists/37i9dQZF1E4spA6mtvS6uH/tracks",
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+    return (response.data["items"] as List).map((item) {
+      final song = item["track"];
+      return Song(
+        name: song["name"],
+        artistName: song["artists"][0]["name"],
+        albumImageUrl: song["album"]["images"][0]["url"],
+        previewUrl: song["preview_url"],
+      );
+    }).toList();
   }
 }
