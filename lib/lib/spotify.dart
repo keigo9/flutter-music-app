@@ -1,8 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void getToken() async {
-  try {
+late SpotifyClient spotify;
+
+Future setupSpotify() async {
+  spotify = await SpotifyClient.initialize();
+}
+
+class SpotifyClient {
+  late final String? token;
+  static Dio dio = Dio();
+
+  static Future<SpotifyClient> initialize() async {
     Response response =
         await Dio().post("https://accounts.spotify.com/api/token",
             data: {
@@ -17,8 +26,12 @@ void getToken() async {
             ));
     final data = response.data;
     final token = data["access_token"];
+    SpotifyClient spotify = SpotifyClient();
+    spotify.token = token;
+    return spotify;
+  }
+
+  void test() {
     print(token);
-  } catch (e) {
-    print(e);
   }
 }
