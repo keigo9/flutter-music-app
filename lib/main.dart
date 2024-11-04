@@ -46,7 +46,7 @@ class _MusicAppState extends State<MusicApp> {
     _controller.addListener(() {
       if (_controller.position.maxScrollExtent - 100 < _controller.offset &&
           _searchedSongs != null) {
-        _searchSongs();
+        _searchSongs(true);
       }
     });
 
@@ -88,7 +88,7 @@ class _MusicAppState extends State<MusicApp> {
     });
   }
 
-  void _searchSongs() async {
+  void _searchSongs(bool isScroll) async {
     if (_isLoading) return;
     setState(() {
       _isLoading = true;
@@ -98,8 +98,9 @@ class _MusicAppState extends State<MusicApp> {
         keyword: _keyword, limit: _limit, offset: offset);
     setState(() {
       page++;
-      _searchedSongs =
-          _searchedSongs != null ? [..._searchedSongs!, ...songs] : songs;
+      _searchedSongs = (_searchedSongs != null && isScroll)
+          ? [..._searchedSongs!, ...?songs]
+          : songs;
       _isLoading = false;
     });
   }
@@ -154,7 +155,7 @@ class _MusicAppState extends State<MusicApp> {
                                 border: InputBorder.none,
                               ),
                               onChanged: _handleTextFieldChanged,
-                              onEditingComplete: () => _searchSongs(),
+                              onEditingComplete: () => _searchSongs(false),
                             ),
                           ),
                         ],

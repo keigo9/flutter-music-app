@@ -56,11 +56,14 @@ class SpotifyClient {
     }).toList();
   }
 
-  Future<List<Song>> searchSongs({
+  Future<List<Song>?> searchSongs({
     required String keyword,
     required int limit,
     required int offset,
   }) async {
+    if (keyword.isEmpty) {
+      return null;
+    }
     Response response = await dio.get(
       "https://api.spotify.com/v1/search",
       options: Options(
