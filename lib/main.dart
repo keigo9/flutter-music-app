@@ -1,8 +1,10 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:music_app/lib/spotify.dart';
 import 'package:music_app/modules/songs/song.dart';
+import 'package:music_app/widgets/player.dart';
 import 'package:music_app/widgets/song_card.dart';
 
 void main() async {
@@ -23,8 +25,11 @@ class MusicApp extends StatefulWidget {
 }
 
 class _MusicAppState extends State<MusicApp> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   List<Song> _popularSongs = [];
   bool _isInitialized = false;
+  Song? _selectedSong;
+  bool _isPlay = false;
 
   void initState() {
     super.initState();
@@ -37,6 +42,31 @@ class _MusicAppState extends State<MusicApp> {
       _popularSongs = songs;
       _isInitialized = true;
     });
+  }
+
+  void _play() {
+    _audioPlayer.play(UrlSource(_selectedSong!.previewUrl!));
+    setState(() {
+      _isPlay = true;
+    });
+  }
+
+  void _stop() {
+    _audioPlayer.stop();
+    setState(() {
+      _isPlay = false;
+    });
+  }
+
+  void _handleSongSelected(Song song) {
+    if (song.previewUrl == null) {
+      _stop();
+      return;
+    }
+    setState(() {
+      _selectedSong = song;
+    });
+    _play();
   }
 
   @override
@@ -117,7 +147,9 @@ class _MusicAppState extends State<MusicApp> {
                                       (int index) => auto,
                                     ),
                                     children: _popularSongs
-                                        .map((song) => SongCard(song: song))
+                                        .map((song) => SongCard(
+                                            song: song,
+                                            onTap: _handleSongSelected))
                                         .toList(),
                                   ),
                                 )
@@ -125,6 +157,15 @@ class _MusicAppState extends State<MusicApp> {
                             )),
                 ],
               ),
+              if (_selectedSong != null)
+                Align(
+                    alignment: Alignment.bottomCenter,
+                    child: IntrinsicHeight(
+                        child: Player(
+                      song: _selectedSong!,
+                      isPlay: _isPlay,
+                      onButtonTap: _isPlay ? _stop : _play,
+                    )))
             ],
           ),
         ),
